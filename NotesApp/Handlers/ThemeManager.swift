@@ -10,4 +10,5 @@ import SwiftUI
 class ThemeManager{
     static let lightGray = Color("LightGray")
     static let white = Color.white
+    static let black = Color.black
 }

@@ -10,10 +10,12 @@ import SwiftUI
 struct LoginView: View {
     
     let onSignupTap: () -> Void
+    let onHomeTap: () -> Void?
     @State private var email = ""
     @State private var password = ""
     @State private var emailError:String? = nil
     @State private var passwordError:String? = nil
+    @State private var showErrorAlert: Bool = false
     
     var body: some View {
         
@@ -36,8 +38,8 @@ struct LoginView: View {
                         .padding(.bottom,12)
                         .frame(maxWidth: .infinity)
                     }
-                    CustomTextView(isSecure: false,placeHolder: "Enter your email",imageName: "envelope", title: "Email",userInput: $email,errorMessage: emailError)
-                    CustomTextView(isSecure: true,placeHolder: "Enter your password",imageName: "lock",title: "Password",userInput: $password,errorMessage: passwordError)
+                    CustomTextView(isSecure: false,placeHolder: "Enter your email",imageName: "envelope", title: "Email",userInput: $email,errorMessage: emailError).textContentType(.emailAddress)
+                    CustomTextView(isSecure: true,placeHolder: "Enter your password",imageName: "lock",title: "Password",userInput: $password,errorMessage: passwordError).textContentType(.password)
                     
                     Button(action: {
                         validate()
@@ -104,6 +106,14 @@ struct LoginView: View {
                     passwordError = nil
                 }
             }
+            .alert("Error",
+                   isPresented: $showErrorAlert,
+                   actions: {
+                Button("OK", role: .cancel) { }
+            },
+                   message: {
+                Text("Invalid username and password")
+            })
             
             
         }
@@ -111,17 +121,22 @@ struct LoginView: View {
         
     }
     private func validate() {
-         emailError = email.isEmpty ? "Email is required" : nil
-         passwordError = password.isEmpty ? "Password is required" : nil
-
-         if emailError == nil, passwordError == nil {
-             print("Proceed with login...")
-         }
+        onHomeTap()
+//         emailError = email.isEmpty ? "Email is required" : nil
+//         passwordError = password.isEmpty ? "Password is required" : nil
+//
+//         if emailError == nil, passwordError == nil {
+//             if email == "demo@example.com" && password == "demo123" {
+//                 onHomeTap()
+//             }else{
+//                 showErrorAlert = true
+//             }
+//         }
      }
  
 }
 
 #Preview {
     let onSignupTap: () -> Void = {}
-    LoginView(onSignupTap: onSignupTap)
+    LoginView(onSignupTap: onSignupTap,onHomeTap: {})
 }

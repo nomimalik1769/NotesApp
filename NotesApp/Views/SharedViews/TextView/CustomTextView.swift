@@ -12,8 +12,10 @@ struct CustomTextView: View {
     let placeHolder: String
     let imageName:String
     let title:String
-
+    
     @Binding var userInput:String
+    var isTextEditor : Bool = false
+    
     var errorMessage: String? = nil
 
     
@@ -23,30 +25,49 @@ struct CustomTextView: View {
                 .font(.subheadline)
                 .bold()
             HStack{
-                Image(systemName:imageName).frame(width: 16, height: 16).padding(.leading,8)
-                    .foregroundStyle(ThemeManager.white)
+                if imageName != ""{
+                    Image(systemName:imageName).frame(width: 16, height: 16).padding(.leading,8)
+                        .foregroundStyle(ThemeManager.black)
+                }else{
+                    Spacer(minLength: 12)
+                }
                 if isSecure{
                     SecureField(text: $userInput) {
                         Text(placeHolder)
-                            .foregroundStyle(ThemeManager.white)
+                            .foregroundStyle(ThemeManager.black)
                             .font(.system(size: 12))
                     }
                     .frame(height: 35)
                     .font(.system(size: 12))
-                    .foregroundStyle(ThemeManager.white)
+                    .foregroundStyle(ThemeManager.black)
                 }else{
-                    TextField(text: $userInput) {
+                    if isTextEditor{
                         Text(placeHolder)
-                            .foregroundStyle(ThemeManager.white)
+                            .foregroundStyle(ThemeManager.black)
                             .font(.system(size: 12))
+                        TextEditor(text: $userInput)
+                            .frame(height: 50)
+                            .font(.system(size: 12))
+                            .scaledToFill()
+                            .frame(maxWidth: .infinity,alignment: .leading)
+                        
+                        
+                    }else{
+                        TextField(text: $userInput) {
+                            Text(placeHolder)
+                                .foregroundStyle(ThemeManager.black)
+                                .font(.system(size: 12))
+                        }
+                        .frame(height: 35)
+                        .font(.system(size: 12))
+                        .foregroundStyle(ThemeManager.black)
                     }
-                    .frame(height: 35)
-                    .font(.system(size: 12))
-                    .foregroundStyle(ThemeManager.white)
+                    
                 }
             }
+            .frame(maxWidth: .infinity)
             .background(
-                errorMessage != nil ? Color.red.opacity(0.45) : Color.gray
+                errorMessage != nil ? Color.red.opacity(0.45) : Color(.systemGray6)
             )
             .cornerRadius(8)
             
@@ -61,5 +82,5 @@ struct CustomTextView: View {
 }
 
 #Preview {
-    CustomTextView(isSecure: false, placeHolder: "Enter your email", imageName: "envelope", title: "Email",userInput: .constant(""))
+    CustomTextView(isSecure: false, placeHolder: "Enter your email", imageName: "envelope", title: "Email",userInput: .constant(""),isTextEditor: true)
 }
