@@ -23,14 +23,13 @@ struct HomeView: View {
                     
                     switch selectedTab {
                     case .notes:
-                        NotesView {
-                            
-                        }
+                        NotesView {}
                     case .profile:
                         ProfileView()
                             .padding(.vertical,20)
                     case .dashboard:
                         DashboardView()
+                        
                     }
                     
                     Spacer()
