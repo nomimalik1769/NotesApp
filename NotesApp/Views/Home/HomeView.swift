@@ -11,13 +11,14 @@ struct HomeView: View {
     let onLogout: () -> Void
     @State private var path: [String] = []  // you can make this an enum like we did for Auth
     @State private var selectedTab: TopTab = .notes
+    @StateObject private var defaults = DefaultsManager.shared
 
     var body: some View {
         NavigationStack(path: $path) {
             ZStack{
                 Color(.systemGray6)
                 VStack(alignment:.leading) {
-                    AppHeaderView(onLogout: onLogout,userName: "Demo")
+                    AppHeaderView(onLogout: onLogout,userName: defaults.profile?.name ?? "")
                     SegmentedTabs(selected: $selectedTab)
                         .padding(.horizontal,12)
                     

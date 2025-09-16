@@ -6,8 +6,12 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct DashboardView: View {
+    @StateObject private var defaults = DefaultsManager.shared
+    @Query var allNotes : [Note] = []
+    
     var body: some View {
         VStack(alignment: .leading,spacing: 10){
             HStack(alignment:.center){
@@ -23,7 +27,7 @@ struct DashboardView: View {
                     )
                 
                 VStack(alignment:.leading){
-                    Text("Welcome back, Demo user!")
+                    Text("Welcome back, \(defaults.profile?.name ?? "")!")
                         .font(.headline)
                     Text("Here's an overview of your notes activity")
                         .font(.caption)
@@ -35,8 +39,8 @@ struct DashboardView: View {
             .padding(.horizontal,15)
             
             List{
-                ForEach(0..<2){_ in
-                    DashboardCardView()
+                ForEach(0..<1){_ in
+                    DashboardCardView(allNotes: allNotes)
                 }
                 .listRowSeparator(.hidden, edges: .all)
                 .listRowBackground(Color(.systemGray6))
@@ -58,6 +62,7 @@ struct DashboardView: View {
 
 
 struct DashboardCardView:View {
+    @State var allNotes : [Note]
     var body: some View {
         VStack(spacing: 100){
             HStack{
@@ -70,7 +75,7 @@ struct DashboardCardView:View {
             }
             
             VStack(alignment: .leading){
-                Text("1")
+                Text("\(allNotes.count)")
                     .font(.headline)
                     .bold()
                 Text("All time")
@@ -91,5 +96,5 @@ struct DashboardCardView:View {
 }
 
 #Preview {
-    DashboardCardView()
+    DashboardCardView(allNotes: [])
 }

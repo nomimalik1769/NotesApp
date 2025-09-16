@@ -42,15 +42,14 @@ struct CustomTextView: View {
                     .foregroundStyle(ThemeManager.black)
                 }else{
                     if isTextEditor{
-                        Text(placeHolder)
-                            .foregroundStyle(ThemeManager.black)
-                            .font(.system(size: 12))
                         TextEditor(text: $userInput)
-                            .frame(height: 50)
                             .font(.system(size: 12))
-                            .scaledToFill()
-                            .frame(maxWidth: .infinity,alignment: .leading)
-                        
+                            .foregroundColor(.primary)                  // make sure text is visible
+                            .padding(4)
+                            .frame(minHeight: 50, maxHeight: 120)       // give it a bit of room
+                            .scrollContentBackground(.hidden)           // hide default UITextView bg
+                            .background(Color(.systemGray6))       // actual visible bg
+                            
                         
                     }else{
                         TextField(text: $userInput) {

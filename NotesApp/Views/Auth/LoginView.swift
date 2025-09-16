@@ -6,11 +6,16 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct LoginView: View {
     
     let onSignupTap: () -> Void
     let onHomeTap: () -> Void?
+    
+    @Environment(\.modelContext) var modelContext
+    @StateObject var defaults = DefaultsManager.shared
+    
     @State private var email = ""
     @State private var password = ""
     @State private var emailError:String? = nil
@@ -38,7 +43,9 @@ struct LoginView: View {
                         .padding(.bottom,12)
                         .frame(maxWidth: .infinity)
                     }
-                    CustomTextView(isSecure: false,placeHolder: "Enter your email",imageName: "envelope", title: "Email",userInput: $email,errorMessage: emailError).textContentType(.emailAddress)
+                    CustomTextView(isSecure: false,placeHolder: "Enter your email",imageName: "envelope", title: "Email",userInput: $email,errorMessage: emailError)
+                        
+                        
                     CustomTextView(isSecure: true,placeHolder: "Enter your password",imageName: "lock",title: "Password",userInput: $password,errorMessage: passwordError).textContentType(.password)
                     
                     Button(action: {
@@ -121,18 +128,27 @@ struct LoginView: View {
         
     }
     private func validate() {
-        onHomeTap()
-//         emailError = email.isEmpty ? "Email is required" : nil
-//         passwordError = password.isEmpty ? "Password is required" : nil
-//
-//         if emailError == nil, passwordError == nil {
-//             if email == "demo@example.com" && password == "demo123" {
-//                 onHomeTap()
-//             }else{
-//                 showErrorAlert = true
-//             }
-//         }
+        emailError = email.isEmpty ? "Email is required" : nil
+        passwordError = password.isEmpty ? "Password is required" : nil
+        
+        if emailError == nil, passwordError == nil {
+            if let user = checkIfUserExist(){
+                defaults.isLoggedIn = true
+                defaults.profile = user.dto
+                onHomeTap()
+            }else{
+                showErrorAlert = true
+            }
+        }
      }
+    
+    private func checkIfUserExist() -> UserModel?{
+        let predicate = #Predicate<UserModel>{$0.email == email && $0.password == password}
+        let descriptor = FetchDescriptor(predicate: predicate)
+        let getData = try? modelContext.fetch(descriptor)
+        return (getData?.first)
+        
+    }
  
 }
 

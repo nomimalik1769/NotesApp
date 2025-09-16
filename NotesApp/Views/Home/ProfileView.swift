@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ProfileView: View {
     
@@ -14,6 +15,9 @@ struct ProfileView: View {
     
     @State var isEditingEnable : Bool = false
     
+    @StateObject private var defaults = DefaultsManager.shared
+    @Environment(\.modelContext) var modelContext
+        
     var body: some View {
         ScrollView{
             VStack(alignment: .leading){
@@ -45,8 +49,10 @@ struct ProfileView: View {
                         Spacer(minLength: 20)
                         
                         CustomTextView(isSecure: false, placeHolder: "Enter Full Name", imageName: "person", title: "Full Name", userInput: $fullName)
+                            .allowsHitTesting(isEditingEnable)
                         Spacer(minLength: 12)
                         CustomTextView(isSecure: false, placeHolder: "Enter Email Address", imageName: "envelope", title: "Email Address", userInput: $emailAddress)
+                            .allowsHitTesting(false)
                         Spacer(minLength: 20)
                         HStack(alignment: .center, spacing: 10){
                            Spacer()
@@ -78,6 +84,9 @@ struct ProfileView: View {
                             }
                             
                             Button(action:{
+                                if isEditingEnable{
+                                    updateUserData()
+                                }
                                 withAnimation {
                                     isEditingEnable.toggle()
                                 }
@@ -124,7 +133,7 @@ struct ProfileView: View {
                     Spacer(minLength: 20)
                     
                     VStack(alignment:.center,spacing:12){
-                        CustomTextView(isSecure: false, placeHolder: "User-ID", imageName: "", title: "User-ID", userInput: .constant(""))
+                        CustomTextView(isSecure: false, placeHolder: "User-ID", imageName: "", title: "User-ID", userInput: .constant(defaults.profile?.email ?? ""))
                             .allowsHitTesting(false)
                         
                         CustomTextView(isSecure: false, placeHolder: "Account Type", imageName: "", title: "Account Type", userInput: .constant("Standard Type"))
@@ -143,7 +152,28 @@ struct ProfileView: View {
             .padding(.bottom,20)
         }
         .background(Color(.systemGray6))
+        .onAppear {
+            fullName = defaults.profile?.name ?? ""
+            emailAddress = defaults.profile?.email ?? ""
+        }
         
+    }
+    private func updateUserData(){
+        let predicate = #Predicate<UserModel>{$0.email == emailAddress}
+        let descriptor = FetchDescriptor(predicate: predicate)
+        
+        if let userData = (try? modelContext.fetch(descriptor))?.first{
+            
+            userData.name = fullName
+            userData.email = emailAddress
+            defaults.profile = userData.dto
+            do {
+                try modelContext.save()
+                print("✅ User updated")
+            } catch {
+                print("❌ Failed to update: \(error)")
+            }
+        }
     }
 }
 

@@ -6,12 +6,18 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct NewNoteView: View {
     
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
+    
     @State var titleName: String = ""
     @State var content: String = ""
+    
+    @Binding var selectedNote :Note?
+    
     
     var body: some View {
         ZStack{
@@ -48,7 +54,7 @@ struct NewNoteView: View {
                     .foregroundStyle(.black)
                     .font(.subheadline)
                     
-                    Button(action:{},label:{
+                    Button(action:{saveNewNote()},label:{
                         Text("Create Note")
                     })
                     .buttonStyle(BorderedProminentButtonStyle())
@@ -65,10 +71,45 @@ struct NewNoteView: View {
             .padding()
             
         }
+        .onAppear {
+            if let selectedNote{
+                titleName = selectedNote.title
+                content = selectedNote.body
+            }
+        }
         
+    }
+    private func saveNewNote(){
+        if selectedNote != nil{
+            updateNote()
+            
+        }else{
+            if !titleName.isEmpty && !content.isEmpty{
+                let newNote = Note(title: titleName, body: content, date: Date())
+                modelContext.insert(newNote)
+                dismiss()
+            }
+        }
+    }
+    private func updateNote(){
+        if !titleName.isEmpty && !content.isEmpty{
+            guard let selectedNote else {return}
+            let idOf = selectedNote.id
+            let getNote = #Predicate<Note>{$0.id == idOf}
+            var descriptor = FetchDescriptor(predicate: getNote)
+            descriptor.fetchLimit = 1
+            if let fetchedFirstNote = try? modelContext.fetch(descriptor).first{
+                fetchedFirstNote.title = titleName
+                fetchedFirstNote.body = content
+                try? modelContext.save()
+                dismiss()
+            }
+            
+            
+        }
     }
 }
 
 #Preview {
-    NewNoteView()
+    NewNoteView(selectedNote: .constant(nil))
 }

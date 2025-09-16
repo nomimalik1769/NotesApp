@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 // 1) Define your routes
 enum Route: Hashable {
     case signup
@@ -16,21 +17,25 @@ enum Route: Hashable {
 // 2) Root container that owns the NavigationStack + path
 struct RootNavView: View {
     @State private var path: [Route] = []
-    @State var isLoggedIn = false
+    @StateObject var defaults = DefaultsManager.shared
+    
+    let container : ModelContainer = {
+        let schema = Schema([Note.self,UserModel.self])
+        let innerContainer = try! ModelContainer(for: schema,configurations: [])
+        return innerContainer
+    }()
     
     var body: some View {
         Group{
-            if isLoggedIn{
+            if defaults.isLoggedIn{
                 HomeView(onLogout: {
-                    isLoggedIn = false
+                    defaults.isLoggedIn = false
                 })
             }else{
                 NavigationStack(path: $path) {
                     LoginView(onSignupTap: {            // push via button
                         path.append(.signup)
-                    },onHomeTap: {
-                        isLoggedIn = true
-                    })
+                    },onHomeTap: {})
                     .toolbarVisibility(.hidden, for: .navigationBar)
                     .navigationDestination(for: Route.self) { route in
                         switch route {
@@ -44,11 +49,13 @@ struct RootNavView: View {
                 .toolbarVisibility(.hidden, for: .navigationBar)
             }
         }
+        .modelContainer(container)
         
     }
+    
 }
 
 
 #Preview {
-    RootNavView(isLoggedIn: false)
+    RootNavView()
 }
